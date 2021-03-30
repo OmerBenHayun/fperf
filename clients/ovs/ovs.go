@@ -42,8 +42,8 @@ func New(fs *fperf.FlagSet) fperf.Client {
 	/*
 	var keySize int
 	fs.IntVar(&keySize, "key-size", 4, "length of the random key")
-	fs.Parse()
 	*/
+	fs.Parse()
 	args := fs.Args()
 	if len(args) == 0 {
 		op = Put
@@ -61,6 +61,7 @@ func (c *client) Dial(addr string) error {
 	// TODO: mange configs
 	cli,err := libovsdb.Connect(addr,nil)
 	if err != nil {
+		fmt.Printf("Dial error:") //FIXME change this in the future
 		return err
 	}
 	c.ovs=cli
@@ -94,22 +95,32 @@ func (c *client) Request() error {
 	return fmt.Errorf("unknown op %s", c.op)
 }
 
-func doPut(c *client) error {
+func doGet(c *client) error {
 	/*
-	key := c.space.RandKey()
-	value := key
-	_, err := c.etcd.Put(context.Background(), key, value)
-	return err
-	 */
+		_, err := c.etcd.Get(context.Background(), c.space.RandKey())
+		return err
+	*/
+	//TODO this is only the get schema for now ... and not normal get that we with to implement
+	//r,err:=c.ovs.GetSchema("ovnsb_db.db")
+	//r,err:=c.ovs.GetSchema("ovsdb_server")
+	//r,err:=c.ovs.GetSchema("/opt/ovn/ovnsb_db.db")
+	r,err:=c.ovs.GetSchema("_Server")
+	fmt.Print(r)
+	if err != nil {
+		return err
+	}
+
+
 	return nil
 }
-func doGet(c *client) error {
 
+func doPut(c *client) error {
 	/*
-	_, err := c.etcd.Get(context.Background(), c.space.RandKey())
-	return err
+		key := c.space.RandKey()
+		value := key
+		_, err := c.etcd.Put(context.Background(), key, value)
+		return err
 	*/
-
 	/*
 	SetConfig()
 	if testing.Short() {
@@ -118,21 +129,27 @@ func doGet(c *client) error {
 	*/
 
 	// NamedUUID is used to add multiple related Operations in a single Transact operation
+
+	var bridgeName = "gopher-br7"
 	namedUUID := "gopher"
 
 	externalIds := make(map[string]string)
 	externalIds["go"] = "awesome"
 	externalIds["docker"] = "made-for-each-other"
 	oMap, err := libovsdb.NewOvsMap(externalIds)
+	if err != nil {
+		return err
+	}
 	// bridge row to insert
 	bridge := make(map[string]interface{})
-	bridge["name"] = libovsdb.bridgeName
+	bridge["name"] = bridgeName
 	bridge["external_ids"] = oMap
 
 	// simple insert operation
 	insertOp := libovsdb.Operation{
 		Op:       "insert",
-		Table:    "Bridge",
+		//Table:    "Bridge",
+		Table:    "SB_global",
 		Row:      bridge,
 		UUIDName: namedUUID,
 	}
@@ -156,6 +173,7 @@ func doGet(c *client) error {
 	reply, err := c.ovs.Transact("Open_vSwitch", operations...)
 
 	if len(reply) < len(operations) {
+		fmt.Printf("number of replies is %v and nomber of operations is %v",len(reply),len(operations))
 		return errors.New("Number of Replies should be atleast equal to number of Operations")
 	}
 	//ok := true
@@ -168,6 +186,7 @@ func doGet(c *client) error {
 			//ok = false
 		}
 	}
+
 	/*
 	if ok {
 		fmt.Println("Bridge Addition Successful : ", reply[0].UUID.GoUUID)

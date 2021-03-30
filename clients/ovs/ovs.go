@@ -100,6 +100,8 @@ func doGet(c *client) error {
 		_, err := c.etcd.Get(context.Background(), c.space.RandKey())
 		return err
 	*/
+
+	/*
 	//TODO this is only the get schema for now ... and not normal get that we with to implement
 	//r,err:=c.ovs.GetSchema("ovnsb_db.db")
 	//r,err:=c.ovs.GetSchema("ovsdb_server")
@@ -109,6 +111,7 @@ func doGet(c *client) error {
 	if err != nil {
 		return err
 	}
+	*/
 
 
 	return nil
@@ -128,6 +131,7 @@ func doPut(c *client) error {
 	}
 	*/
 
+	/*
 	// NamedUUID is used to add multiple related Operations in a single Transact operation
 
 	var bridgeName = "gopher-br7"
@@ -150,7 +154,8 @@ func doPut(c *client) error {
 		Op:       "insert",
 		//Table:    "Bridge",
 		Table:    "SB_global",
-		Row:      bridge,
+		//Row:      bridge,
+		Row:      "nb_cfg",
 		UUIDName: namedUUID,
 	}
 
@@ -170,7 +175,10 @@ func doPut(c *client) error {
 	}
 
 	operations := []libovsdb.Operation{insertOp, mutateOp}
-	reply, err := c.ovs.Transact("Open_vSwitch", operations...)
+	reply, err := c.ovs.Transact("_Server", operations...)
+	if err!=nil{
+			return err
+	}
 
 	if len(reply) < len(operations) {
 		fmt.Printf("number of replies is %v and nomber of operations is %v",len(reply),len(operations))
@@ -186,14 +194,42 @@ func doPut(c *client) error {
 			//ok = false
 		}
 	}
-
+	*/
 	/*
 	if ok {
 		fmt.Println("Bridge Addition Successful : ", reply[0].UUID.GoUUID)
 		bridgeUUID = reply[0].UUID.GoUUID
 	}
 	 */
+	// simple insert operation
 
+	bridge := make(map[string]interface{})
+	bridge["name"] = "omer"
+	bridge["external_ids"] = "yay"
+
+	insertOp := libovsdb.Operation{
+		Op:       "insert",
+		Table:    "MAC_Binding",
+		Columns : []string{"ip"},
+		//Table:    "SHOKO",
+		//Row:      bridge,
+		//Row:      "nb_cfg",
+		//Row : map[string]string{"a":"b"},
+		//UUIDName: "omer",
+	}
+	operations := []libovsdb.Operation{insertOp}
+	//reply, err := c.ovs.Transact("_Server", operations...)
+	reply, err := c.ovs.Transact("OVN_Southbound", operations...)
+	if err!=nil{
+			return err
+	}
+
+	if len(reply) < len(operations) {
+		fmt.Printf("number of replies is %v and nomber of operations is %v",len(reply),len(operations))
+		return errors.New("Number of Replies should be atleast equal to number of Operations")
+	}
+	fmt.Print("yaty")
+	//ok := true
 
 
 	return nil

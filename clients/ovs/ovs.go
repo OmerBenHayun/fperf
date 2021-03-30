@@ -2,17 +2,16 @@ package ovs
 
 import (
 	//"context"
-	"fmt"
 	"errors"
+	"fmt"
+	"strconv"
 
 	//"strings"
 	//"time"
 
 	"github.com/ebay/libovsdb"
 	"github.com/fperf/fperf"
-
 	//. "github.com/fperf/etcd/generator"
-
 )
 
 func init() {
@@ -96,33 +95,20 @@ func (c *client) Request() error {
 }
 
 func doGet(c *client) error {
-	/*
-		_, err := c.etcd.Get(context.Background(), c.space.RandKey())
-		return err
-	*/
+	condition := libovsdb.NewCondition("type","!=",77)
 
-	/*
-	//TODO this is only the get schema for now ... and not normal get that we with to implement
-	//r,err:=c.ovs.GetSchema("ovnsb_db.db")
-	//r,err:=c.ovs.GetSchema("ovsdb_server")
-	//r,err:=c.ovs.GetSchema("/opt/ovn/ovnsb_db.db")
-	r,err:=c.ovs.GetSchema("_Server")
-	fmt.Print(r)
-	if err != nil {
-		return err
+	getOp := libovsdb.Operation{
+			Op:"select",
+			Table: "nb_cfg",
+			Where: []interface{}{condition},
 	}
-	*/
-	//uuid := "some-uuid"
-	//uuid := "2f77b348-9768-4866-b761-89d5177ecdab"
-
-	////condition := libovsdb.NewCondition("_uuid","!=",libovsdb.UUID{uuid})
-	condition := libovsdb.NewCondition("ip","!=","check")
-
+	/*
 	getOp := libovsdb.Operation{
 			Op:"select",
 			Table: "MAC_Binding",
 			Where: []interface{}{condition},
 	}
+	*/
 
 	operations := []libovsdb.Operation{getOp}
 
@@ -142,108 +128,20 @@ func doGet(c *client) error {
 	return nil
 }
 
+var i=0
+
 func doPut(c *client) error {
 	/*
-		key := c.space.RandKey()
-		value := key
-		_, err := c.etcd.Put(context.Background(), key, value)
-		return err
-	*/
-	/*
-	SetConfig()
-	if testing.Short() {
-		t.Skip()
-	}
-	*/
-
-	/*
-	// NamedUUID is used to add multiple related Operations in a single Transact operation
-
-	var bridgeName = "gopher-br7"
-	namedUUID := "gopher"
-
-	externalIds := make(map[string]string)
-	externalIds["go"] = "awesome"
-	externalIds["docker"] = "made-for-each-other"
-	oMap, err := libovsdb.NewOvsMap(externalIds)
-	if err != nil {
-		return err
-	}
-	// bridge row to insert
-	bridge := make(map[string]interface{})
-	bridge["name"] = bridgeName
-	bridge["external_ids"] = oMap
-
-	// simple insert operation
-	insertOp := libovsdb.Operation{
-		Op:       "insert",
-		//Table:    "Bridge",
-		Table:    "SB_global",
-		//Row:      bridge,
-		Row:      "nb_cfg",
-		UUIDName: namedUUID,
-	}
-
-	// Inserting a Bridge row in Bridge table requires mutating the open_vswitch table.
-	mutateUUID := []libovsdb.UUID{{namedUUID}}
-	mutateSet, _ := libovsdb.NewOvsSet(mutateUUID)
-	mutation := libovsdb.NewMutation("bridges", "insert", mutateSet)
-	// hacked Condition till we get Monitor / Select working
-	condition := libovsdb.NewCondition("_uuid", "!=", libovsdb.UUID{"2f77b348-9768-4866-b761-89d5177ecdab"})
-
-	// simple mutate operation
-	mutateOp := libovsdb.Operation{
-		Op:        "mutate",
-		Table:     "Open_vSwitch",
-		Mutations: []interface{}{mutation},
-		Where:     []interface{}{condition},
-	}
-
-	operations := []libovsdb.Operation{insertOp, mutateOp}
-	reply, err := c.ovs.Transact("_Server", operations...)
-	if err!=nil{
-			return err
-	}
-
-	if len(reply) < len(operations) {
-		fmt.Printf("number of replies is %v and nomber of operations is %v",len(reply),len(operations))
-		return errors.New("Number of Replies should be atleast equal to number of Operations")
-	}
-	//ok := true
-	for i, o := range reply {
-		if o.Error != "" && i < len(operations) {
-			return errors.New(fmt.Sprintf("Transaction Failed due to an error :", o.Error, " details:", o.Details, " in ", operations[i]))
-			//ok = false
-		} else if o.Error != "" {
-			return errors.New(fmt.Sprintf("Transaction Failed due to an error :", o.Error))
-			//ok = false
-		}
-	}
-	*/
-	/*
-	if ok {
-		fmt.Println("Bridge Addition Successful : ", reply[0].UUID.GoUUID)
-		bridgeUUID = reply[0].UUID.GoUUID
-	}
-	 */
-	// simple insert operation
 
 	bridge := make(map[string]interface{})
 	bridge["ip"] = "omer"
-	//bridge["external_ids"] = "yay"
 
 	insertOp := libovsdb.Operation{
 		Op:       "insert",
 		Table:    "MAC_Binding",
 		Row : bridge,
-		//Table:    "SHOKO",
-		//Row:      bridge,
-		//Row:      "nb_cfg",
-		//Row : map[string]string{"a":"b"},
-		//UUIDName: "omer",
 	}
 	operations := []libovsdb.Operation{insertOp}
-	//reply, err := c.ovs.Transact("_Server", operations...)
 	reply, err := c.ovs.Transact("OVN_Southbound", operations...)
 	if err!=nil{
 			return err
@@ -254,6 +152,29 @@ func doPut(c *client) error {
 		return errors.New("Number of Replies should be atleast equal to number of Operations")
 	}
 	//ok := true
+	*/
+	r := map[string]interface{}{}
+	i++
+	s:=strconv.Itoa(i)
+	r["name"]="yaya123"+s
+	r["hostname"]="yaya123"+s
+	//r["data"]="gaga"
+	insertOp := libovsdb.Operation{
+		Op:       "insert",
+		//Op:       "update",
+		Table:    "Chassis",
+		Row : r,
+	}
+	operations := []libovsdb.Operation{insertOp}
+	//reply, err := c.ovs.Transact("OVN_Southbound", operations...)
+	reply, err := c.ovs.Transact("OVN_Southbound", operations...)
+	if err!=nil{
+			return err
+	}else{
+			fmt.Print(reply)
+	}
+	fmt.Print("\n")
+
 
 
 	return nil
@@ -266,6 +187,16 @@ func doDelete(c *client) error {
 	return nil
 }
 func doRange(c *client) error {
+	//TODO metod for debug delete in the future
+	//TODO this is only the get schema for now ... and not normal get that we with to implement
+	//r,err:=c.ovs.GetSchema("ovnsb_db.db")
+	//r,err:=c.ovs.GetSchema("ovsdb_server")
+	//r,err:=c.ovs.GetSchema("/opt/ovn/ovnsb_db.db")
+	r,err:=c.ovs.GetSchema("_Server")
+	if err != nil {
+		return err
+	}
+	fmt.Print(r)
 	/*
 	start, end := c.space.RandRange()
 	_, err := c.etcd.Get(context.Background(), start, clientv3.WithRange(end))

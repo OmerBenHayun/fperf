@@ -1,0 +1,3 @@
+go run bin/fperf-build/main.go ./clients/ovs
+sudo ./fperf -N=5 -server tcp:127.0.0.1:6642 -connection 256 -tick 1s ovs $1 > restmp.txt 2> restmp.txt
+vim restmp.txt

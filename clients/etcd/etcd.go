@@ -3,14 +3,14 @@ package etcd
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/fperf/fperf"
 	"go.etcd.io/etcd/clientv3"
 
-	"github.com/OmerBenHayun/fperf/generator"
+	. "github.com/fperf/etcd/generator"
+
 )
 
 func init() {
@@ -30,7 +30,7 @@ const (
 
 type client struct {
 	etcd  *clientv3.Client
-	space *keySpace
+	space *KeySpace
 	op    Op
 }
 
@@ -47,7 +47,7 @@ func New(fs *fperf.FlagSet) fperf.Client {
 		op = Op(args[0])
 	}
 	return &client{
-		space: newKeySpace(keySize),
+		space: NewKeySpace(keySize),
 		op:    op,
 	}
 }
@@ -82,21 +82,21 @@ func (c *client) Request() error {
 }
 
 func doPut(c *client) error {
-	key := c.space.randKey()
+	key := c.space.RandKey()
 	value := key
 	_, err := c.etcd.Put(context.Background(), key, value)
 	return err
 }
 func doGet(c *client) error {
-	_, err := c.etcd.Get(context.Background(), c.space.randKey())
+	_, err := c.etcd.Get(context.Background(), c.space.RandKey())
 	return err
 }
 func doDelete(c *client) error {
-	_, err := c.etcd.Delete(context.Background(), c.space.randKey())
+	_, err := c.etcd.Delete(context.Background(), c.space.RandKey())
 	return err
 }
 func doRange(c *client) error {
-	start, end := c.space.randRange()
+	start, end := c.space.RandRange()
 	_, err := c.etcd.Get(context.Background(), start, clientv3.WithRange(end))
 	return err
 }

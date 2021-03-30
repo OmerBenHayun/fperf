@@ -5,25 +5,25 @@ import (
 	"time"
 )
 
-type keySpace struct {
+type KeySpace struct {
 	r      *rand.Rand
 	nbytes int
 }
 
-func newKeySpace(nbytes int) *keySpace {
-	return &keySpace{
+func NewKeySpace(nbytes int) *KeySpace {
+	return &KeySpace{
 		r:      rand.New(rand.NewSource(time.Now().Unix())),
 		nbytes: nbytes,
 	}
 }
 
-func (ks *keySpace) randKey() string {
+func (ks *KeySpace) RandKey() string {
 	p := make([]byte, ks.nbytes)
 	ks.r.Read(p)
 	return string(p)
 }
-func (ks *keySpace) randRange() (string, string) {
-	start := []byte(ks.randKey())
+func (ks *KeySpace) RandRange() (string, string) {
+	start := []byte(ks.RandKey())
 	if len(start) == 0 {
 		return "", ""
 	}

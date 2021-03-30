@@ -253,6 +253,7 @@ func doPut(c *client) error {
 		fmt.Printf("number of replies is %v and nomber of operations is %v",len(reply),len(operations))
 		return errors.New("Number of Replies should be atleast equal to number of Operations")
 	}
+	fmt.Print("yaty")
 	//ok := true
 
 
